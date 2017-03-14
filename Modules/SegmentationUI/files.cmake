@@ -1,4 +1,5 @@
 set( CPP_FILES
+Qmitk/QmitkThresholdMorphToolGUI.cpp
 Qmitk/QmitkAdaptiveRegionGrowingToolGUI.cpp
 Qmitk/QmitkBinaryThresholdToolGUI.cpp
 Qmitk/QmitkBinaryThresholdULToolGUI.cpp
@@ -34,6 +35,7 @@ Qmitk/QmitkSearchLabelDialog.cpp
 )
 
 set(MOC_H_FILES
+Qmitk/QmitkThresholdMorphToolGUI.h
 Qmitk/QmitkAdaptiveRegionGrowingToolGUI.h
 Qmitk/QmitkBinaryThresholdToolGUI.h
 Qmitk/QmitkBinaryThresholdULToolGUI.h
@@ -68,6 +70,7 @@ Qmitk/QmitkSearchLabelDialog.h
 )
 
 set(UI_FILES
+Qmitk/QmitkThresholdMorphToolGUIControls.ui
 Qmitk/QmitkAdaptiveRegionGrowingToolGUIControls.ui
 Qmitk/QmitkConfirmSegmentationDialog.ui
 Qmitk/QmitkOtsuToolWidgetControls.ui
