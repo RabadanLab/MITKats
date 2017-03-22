@@ -182,10 +182,8 @@ private:
 
 
   int m_SeedpointValue;
-  bool m_SliderInitialized;
   bool m_UseVolumeRendering;
-  bool m_UpdateSuggestedThreshold;
-  float m_SuggestedThValue;
+  bool m_SeedInitialized;
 
   long m_PointSetAddObserverTag;
   long m_PointSetMoveObserverTag;

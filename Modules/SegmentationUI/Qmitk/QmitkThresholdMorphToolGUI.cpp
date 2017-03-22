@@ -52,15 +52,17 @@ QmitkThresholdMorphToolGUI::QmitkThresholdMorphToolGUI(QWidget *parent)
     m_MultiWidget(nullptr),
     m_DataStorage(nullptr),
     m_UseVolumeRendering(false),
-    m_UpdateSuggestedThreshold(true),
-    m_SuggestedThValue(0.0)
+    m_SeedInitialized(false)
 {
   this->setParent(parent);
 
   m_Controls.setupUi(this);
 
+	//ctkRangeWidget controls the slider
   m_Controls.m_ThresholdSlider->setDecimals(1);
+  m_Controls.m_ThresholdSlider->setSingleStep(10.0); //adjust step size of slider
   m_Controls.m_ThresholdSlider->setSpinBoxAlignment(Qt::AlignVCenter);
+  m_Controls.m_ThresholdSlider->setTracking(false);
 
   this->CreateConnections();
   this->SetDataNodeNames("labeledSegmentation", "Result", "FeedbackSurface", "maskedSegmentation");
@@ -193,6 +195,7 @@ void QmitkThresholdMorphToolGUI::OnPointAdded()
     }
 
     m_Controls.m_lblSetSeedpoint->setText("");
+    m_SeedInitialized = true;
 
     mitk::Image *image = dynamic_cast<mitk::Image *>(m_InputImageNode->GetData());
 	
@@ -335,7 +338,7 @@ void QmitkThresholdMorphToolGUI::RunSegmentation()
   {
     m_Controls.m_pbRunSegmentation->setEnabled(true);
     QMessageBox::information(
-      NULL, "Threshold Morphology functionality", "The seed point is empty! Please choose a new seed point.");
+      NULL, "Threshold Morphology functionality", "The seed point is empty at this time! Please choose a new seed point.");
     return;
   }
 
@@ -524,7 +527,6 @@ void QmitkThresholdMorphToolGUI::StartSegmentation(itk::Image<TPixel, VImageDime
   if (m_UseVolumeRendering)
     this->EnableVolumeRendering(true);
 
-  m_UpdateSuggestedThreshold = true; // reset first stored threshold value
   // Setting progress to finished
   //mitk::ProgressBar::GetInstance()->Progress(357);
   mitk::RenderingManager::GetInstance()->RequestUpdateAll();
@@ -661,18 +663,23 @@ void QmitkThresholdMorphToolGUI::UseVolumeRendering(bool on)
 void QmitkThresholdMorphToolGUI::SetLowerThresholdValue(double lowerThreshold)
 {
   m_LOWERTHRESHOLD = lowerThreshold;
+  
+  //Re-segmentation each time the threshold is changed
+  if (m_SeedInitialized)
+  {
+    QmitkThresholdMorphToolGUI::RunSegmentation();
+  }
 }
 
 void QmitkThresholdMorphToolGUI::SetUpperThresholdValue(double upperThreshold)
 {
   m_UPPERTHRESHOLD = upperThreshold;
     
-//  //Re-segmentation each time the threshold is changed
-//  mitk::DataNode::Pointer node = m_ThresholdMorphTool->GetPointSetNode();
-//  if (!node.IsNull())
-//  {
-//    QmitkThresholdMorphToolGUI::RunSegmentation();
-//  }
+  //Re-segmentation each time the threshold is changed
+  if (m_SeedInitialized)
+  {
+    QmitkThresholdMorphToolGUI::RunSegmentation();
+  }
 }
 
 void QmitkThresholdMorphToolGUI::Deactivated()
