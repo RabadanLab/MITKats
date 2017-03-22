@@ -21,7 +21,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include "mitkCommon.h"
 #include "mitkDataStorage.h"
 #include "mitkPointSet.h"
-#include "mitkSinglePointDataInteractor.h"
+#include "mitkPointSetDataInteractor.h"
 #include <MitkSegmentationExports.h>
 
 namespace us
@@ -108,7 +108,10 @@ namespace mitk
     mitk::DataStorage *GetDataStorage();
 
     void ConfirmSegmentation();
-
+    
+    PointSet::Pointer m_PointSet;
+    PointSetDataInteractor::Pointer m_SeedPointInteractor;
+    DataNode::Pointer m_PointSetNode;
   protected:
     /**
      * @brief constructor
@@ -120,10 +123,8 @@ namespace mitk
      */
     virtual ~ThresholdMorphTool();
 
-  private:
-    PointSet::Pointer m_PointSet;
-    SinglePointDataInteractor::Pointer m_SeedPointInteractor;
-    DataNode::Pointer m_PointSetNode;
+//  private:
+
   };
 
 } // namespace

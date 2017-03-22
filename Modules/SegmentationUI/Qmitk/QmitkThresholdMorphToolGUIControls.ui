@@ -41,7 +41,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Shift+Click to place seedpoint</string>
+      <string>Shift+Click to place seedpoints</string>
      </property>
      <property name="margin">
       <number>0</number>
@@ -159,33 +159,33 @@ p, li { white-space: pre-wrap; }
      </item>
     </layout>
    </item>
-   <item>
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="title">
-      <string>Adapt Region Growing:</string>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>6</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-      <item>
-       <widget class="ctkSliderWidget" name="m_PreviewSlider" native="true"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
+<!--   <item>-->
+<!--    <widget class="QGroupBox" name="groupBox_2">-->
+<!--     <property name="title">-->
+<!--      <string>Adapt Region Growing:</string>-->
+<!--     </property>-->
+<!--     <property name="flat">-->
+<!--      <bool>true</bool>-->
+<!--     </property>-->
+<!--     <layout class="QVBoxLayout" name="verticalLayout_2">-->
+<!--      <property name="leftMargin">-->
+<!--       <number>0</number>-->
+<!--      </property>-->
+<!--      <property name="topMargin">-->
+<!--       <number>6</number>-->
+<!--      </property>-->
+<!--      <property name="rightMargin">-->
+<!--       <number>0</number>-->
+<!--      </property>-->
+<!--      <property name="bottomMargin">-->
+<!--       <number>0</number>-->
+<!--      </property>-->
+<!--      <item>-->
+<!--       <widget class="ctkSliderWidget" name="m_PreviewSlider" native="true"/>-->
+<!--      </item>-->
+<!--     </layout>-->
+<!--    </widget>-->
+<!--   </item>-->
    <item>
     <widget class="QPushButton" name="m_pbConfirmSegementation">
      <property name="enabled">

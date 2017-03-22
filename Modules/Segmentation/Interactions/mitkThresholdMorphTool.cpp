@@ -65,7 +65,7 @@ const char **mitk::ThresholdMorphTool::GetXPM() const
 
 const char *mitk::ThresholdMorphTool::GetName() const
 {
-  return "Threshold Morph";
+  return "Threshold Morphology"; //This is where to change the apparent name, but also change in plugins/src/internal/QmitkSegmentationView.cpp
 }
 
 us::ModuleResource mitk::ThresholdMorphTool::GetIconResource() const
@@ -81,7 +81,7 @@ void mitk::ThresholdMorphTool::Activated()
 
   if (!GetDataStorage()->Exists(m_PointSetNode))
     GetDataStorage()->Add(m_PointSetNode, GetWorkingData());
-  m_SeedPointInteractor = mitk::SinglePointDataInteractor::New();
+  m_SeedPointInteractor = mitk::PointSetDataInteractor::New();
   m_SeedPointInteractor->LoadStateMachine("PointSet.xml");
   m_SeedPointInteractor->SetEventConfig("PointSetConfig.xml");
   m_SeedPointInteractor->SetDataNode(m_PointSetNode);

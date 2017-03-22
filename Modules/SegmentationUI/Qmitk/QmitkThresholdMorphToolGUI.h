@@ -38,7 +38,7 @@ class QmitkThresholdMorphToolGUIControls;
 *
 * \brief QmitkThresholdMorphToolGUI
 *
-* Adaptive Region Growing View class of the segmentation.
+* Threshold Morphology View class of the segmentation.
 *
 */
 
@@ -81,7 +81,7 @@ public:
                         std::string maskedSegmentation);
 
   /**
-   * @brief Method to enable/disable controls for region growing
+   * @brief Method to enable/disable controls
    *
    * This method checks if a seed point is set and a segmentation exists.
    * @param enable/disable controls
@@ -110,28 +110,6 @@ protected slots:
    * This method is called, when the "Start Segmentation" button is clicked.
    */
   void RunSegmentation();
-
-  /**
-   * @brief Method to change the level window
-   *
-   * This method is called, when the level window slider is changed via the slider in the control widget
-   * @param new value
-   */
-  void ChangeLevelWindow(double newValue);
-
-  /**
-   * @brief Method to increase the preview slider
-   *
-   * This method is called, when the + button is clicked and increases the value by 1
-   */
-  void IncreaseSlider();
-
-  /**
-   * @brief Method to decrease the preview slider
-   *
-   * This method is called, when the - button is clicked and decreases the value by 1
-   */
-  void DecreaseSlider();
 
   /**
    * @brief Method to confirm the preview segmentation
@@ -170,7 +148,7 @@ protected slots:
   void OnNewToolAssociated(mitk::Tool *);
 
 protected:
-  mitk::ThresholdMorphTool::Pointer m_RegionGrow3DTool;
+  mitk::ThresholdMorphTool::Pointer m_ThresholdMorphTool;
 
   /** \brief Destructor. */
   virtual ~QmitkThresholdMorphToolGUI();
@@ -197,13 +175,11 @@ private:
   mitk::ScalarType m_LOWERTHRESHOLD; // Hounsfield value
   mitk::ScalarType m_UPPERTHRESHOLD; // Hounsfield value
   mitk::ScalarType m_SeedPointValueMean;
+  mitk::ScalarType m_SeedPointValueVar;
 
   void RemoveHelperNodes();
 
-  int m_DetectedLeakagePoint;
 
-  bool m_CurrentRGDirectionIsUpwards; // defines fixed threshold (true = LOWERTHRESHOLD fixed, false = UPPERTHRESHOLD
-                                      // fixed)
 
   int m_SeedpointValue;
   bool m_SliderInitialized;
@@ -215,18 +191,13 @@ private:
   long m_PointSetMoveObserverTag;
 
   template <typename TPixel, unsigned int VImageDimension>
-  void StartRegionGrowing(itk::Image<TPixel, VImageDimension> *itkImage,
+  void StartSegmentation(itk::Image<TPixel, VImageDimension> *itkImage,
                           mitk::BaseGeometry *imageGeometry,
-                          mitk::PointSet::PointType seedPoint);
+                          mitk::PointSet *seedPointSet);
 
-  template <typename TPixel, unsigned int VImageDimension>
-  void ITKThresholding(itk::Image<TPixel, VImageDimension> *inputImage);
-
-  void InitializeLevelWindow();
 
   void EnableVolumeRendering(bool enable);
 
-  void UpdateVolumeRenderingThreshold(int thValue);
 };
 
 #endif
