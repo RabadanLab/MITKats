@@ -13,7 +13,7 @@ A PARTICULAR PURPOSE.
 See LICENSE.txt or http://www.mitk.org for details.
 
 ===================================================================*/
-#include "QmitkThresholdMorphToolGUI.h"
+#include "QmitkThresholdComponentsToolGUI.h"
 
 #include "QmitkStdMultiWidget.h"
 
@@ -45,13 +45,13 @@ See LICENSE.txt or http://www.mitk.org for details.
 
 #include "mitkImageCast.h"
 
-MITK_TOOL_GUI_MACRO(, QmitkThresholdMorphToolGUI, "")
+MITK_TOOL_GUI_MACRO(, QmitkThresholdComponentsToolGUI, "")
 
-QmitkThresholdMorphToolGUI::QmitkThresholdMorphToolGUI(QWidget *parent)
+QmitkThresholdComponentsToolGUI::QmitkThresholdComponentsToolGUI(QWidget *parent)
   : QmitkToolGUI(),
     m_MultiWidget(nullptr),
     m_DataStorage(nullptr),
-    m_UseVolumeRendering(false),
+    m_UseVolumeRendering(true),
     m_SeedInitialized(false)
 {
   this->setParent(parent);
@@ -70,34 +70,34 @@ QmitkThresholdMorphToolGUI::QmitkThresholdMorphToolGUI(QWidget *parent)
   connect(this, SIGNAL(NewToolAssociated(mitk::Tool *)), this, SLOT(OnNewToolAssociated(mitk::Tool *)));
 }
 
-QmitkThresholdMorphToolGUI::~QmitkThresholdMorphToolGUI()
+QmitkThresholdComponentsToolGUI::~QmitkThresholdComponentsToolGUI()
 {
   // Removing the observer of the PointSet node
-  if (m_ThresholdMorphTool->GetPointSetNode().IsNotNull())
+  if (m_ThresholdComponentsTool->GetPointSetNode().IsNotNull())
   {
-    m_ThresholdMorphTool->GetPointSetNode()->GetData()->RemoveObserver(m_PointSetAddObserverTag);
-    m_ThresholdMorphTool->GetPointSetNode()->GetData()->RemoveObserver(m_PointSetMoveObserverTag);
+    m_ThresholdComponentsTool->GetPointSetNode()->GetData()->RemoveObserver(m_PointSetAddObserverTag);
+    m_ThresholdComponentsTool->GetPointSetNode()->GetData()->RemoveObserver(m_PointSetMoveObserverTag);
   }
   this->RemoveHelperNodes();
 }
 
-void QmitkThresholdMorphToolGUI::OnNewToolAssociated(mitk::Tool *tool)
+void QmitkThresholdComponentsToolGUI::OnNewToolAssociated(mitk::Tool *tool)
 {
-  m_ThresholdMorphTool = dynamic_cast<mitk::ThresholdMorphTool *>(tool);
-  if (m_ThresholdMorphTool.IsNotNull())
-  {
-    SetInputImageNode(this->m_ThresholdMorphTool->GetReferenceData());
-    this->m_DataStorage = this->m_ThresholdMorphTool->GetDataStorage();
+  m_ThresholdComponentsTool = dynamic_cast<mitk::ThresholdComponentsTool *>(tool);
+  if (m_ThresholdComponentsTool.IsNotNull())
+  { this->m_ThresholdComponentsTool->SetOverwriteExistingSegmentation(true);
+    SetInputImageNode(this->m_ThresholdComponentsTool->GetReferenceData());
+    this->m_DataStorage = this->m_ThresholdComponentsTool->GetDataStorage();
     this->EnableControls(true);
 
     // Watch for point added or modified
-    itk::SimpleMemberCommand<QmitkThresholdMorphToolGUI>::Pointer pointAddedCommand =
-      itk::SimpleMemberCommand<QmitkThresholdMorphToolGUI>::New();
-    pointAddedCommand->SetCallbackFunction(this, &QmitkThresholdMorphToolGUI::OnPointAdded);
+    itk::SimpleMemberCommand<QmitkThresholdComponentsToolGUI>::Pointer pointAddedCommand =
+      itk::SimpleMemberCommand<QmitkThresholdComponentsToolGUI>::New();
+    pointAddedCommand->SetCallbackFunction(this, &QmitkThresholdComponentsToolGUI::OnPointAdded);
     m_PointSetAddObserverTag =
-      m_ThresholdMorphTool->GetPointSetNode()->GetData()->AddObserver(mitk::PointSetAddEvent(), pointAddedCommand);
+      m_ThresholdComponentsTool->GetPointSetNode()->GetData()->AddObserver(mitk::PointSetAddEvent(), pointAddedCommand);
     m_PointSetMoveObserverTag =
-      m_ThresholdMorphTool->GetPointSetNode()->GetData()->AddObserver(mitk::PointSetMoveEvent(), pointAddedCommand);
+      m_ThresholdComponentsTool->GetPointSetNode()->GetData()->AddObserver(mitk::PointSetMoveEvent(), pointAddedCommand);
   }
   else
   {
@@ -105,7 +105,7 @@ void QmitkThresholdMorphToolGUI::OnNewToolAssociated(mitk::Tool *tool)
   }
 }
 
-void QmitkThresholdMorphToolGUI::RemoveHelperNodes()
+void QmitkThresholdComponentsToolGUI::RemoveHelperNodes()
 {
   mitk::DataNode::Pointer imageNode = m_DataStorage->GetNamedNode(m_NAMEFORLABLEDSEGMENTATIONIMAGE);
   if (imageNode.IsNotNull())
@@ -120,10 +120,10 @@ void QmitkThresholdMorphToolGUI::RemoveHelperNodes()
   }
 }
 
-void QmitkThresholdMorphToolGUI::CreateConnections()
+void QmitkThresholdComponentsToolGUI::CreateConnections()
 {
   // Connecting GUI components
-  connect((QObject *)(m_Controls.m_pbRunSegmentation), SIGNAL(clicked()), this, SLOT(RunSegmentation()));
+  //connect((QObject *)(m_Controls.m_pbRunSegmentation), SIGNAL(clicked()), this, SLOT(RunSegmentation()));
   //connect(m_Controls.m_PreviewSlider, SIGNAL(valueChanged(double)), this, SLOT(ChangeLevelWindow(double)));
   connect((QObject *)(m_Controls.m_pbConfirmSegementation), SIGNAL(clicked()), this, SLOT(ConfirmSegmentation()));
   connect((QObject *)(m_Controls.m_cbVolumeRendering), SIGNAL(toggled(bool)), this, SLOT(UseVolumeRendering(bool)));
@@ -133,7 +133,7 @@ void QmitkThresholdMorphToolGUI::CreateConnections()
     m_Controls.m_ThresholdSlider, SIGNAL(minimumValueChanged(double)), this, SLOT(SetLowerThresholdValue(double)));
 }
 
-void QmitkThresholdMorphToolGUI::SetDataNodeNames(std::string labledSegmentation,
+void QmitkThresholdComponentsToolGUI::SetDataNodeNames(std::string labledSegmentation,
                                                          std::string binaryImage,
                                                          std::string surface,
                                                          std::string maskedSegmentation)
@@ -144,17 +144,17 @@ void QmitkThresholdMorphToolGUI::SetDataNodeNames(std::string labledSegmentation
   m_NAMEFORMASKEDSEGMENTATION = maskedSegmentation;
 }
 
-void QmitkThresholdMorphToolGUI::SetDataStorage(mitk::DataStorage *dataStorage)
+void QmitkThresholdComponentsToolGUI::SetDataStorage(mitk::DataStorage *dataStorage)
 {
   m_DataStorage = dataStorage;
 }
 
-void QmitkThresholdMorphToolGUI::SetMultiWidget(QmitkStdMultiWidget *multiWidget)
+void QmitkThresholdComponentsToolGUI::SetMultiWidget(QmitkStdMultiWidget *multiWidget)
 {
   m_MultiWidget = multiWidget;
 }
 
-void QmitkThresholdMorphToolGUI::SetInputImageNode(mitk::DataNode *node)
+void QmitkThresholdComponentsToolGUI::SetInputImageNode(mitk::DataNode *node)
 {
   m_InputImageNode = node;
   mitk::Image *inputImage = dynamic_cast<mitk::Image *>(m_InputImageNode->GetData());
@@ -177,25 +177,24 @@ static void AccessPixel(mitk::PixelType /*ptype*/, const mitk::Image::Pointer im
   val = access.GetPixelByWorldCoordinates(p);
 }
 
-void QmitkThresholdMorphToolGUI::OnPointAdded()
+void QmitkThresholdComponentsToolGUI::OnPointAdded()
 {
-  if (m_ThresholdMorphTool.IsNull())
+  if (m_ThresholdComponentsTool.IsNull())
     return;
 
-  mitk::DataNode *node = m_ThresholdMorphTool->GetPointSetNode();
-	//m_ThresholdMorphTool->GetPointSetNode()->SetData(); //to add data to this node.
+  mitk::DataNode *node = m_ThresholdComponentsTool->GetPointSetNode();
+	//m_ThresholdComponentsTool->GetPointSetNode()->SetData(); //to add data to this node.
   if (node != NULL)
   {
     mitk::PointSet::Pointer pointSet = dynamic_cast<mitk::PointSet *>(node->GetData());
 
     if (pointSet.IsNull())
     {
-      QMessageBox::critical(NULL, "QmitkThresholdMorphToolGUI", "PointSetNode does not contain a pointset");
+      QMessageBox::critical(NULL, "QmitkThresholdComponentsToolGUI", "PointSetNode does not contain a pointset");
       return;
     }
 
-    m_Controls.m_lblSetSeedpoint->setText("");
-    m_SeedInitialized = true;
+    //m_Controls.m_lblSetSeedpoint->setText("");
 
     mitk::Image *image = dynamic_cast<mitk::Image *>(m_InputImageNode->GetData());
 	
@@ -222,6 +221,12 @@ void QmitkThresholdMorphToolGUI::OnPointAdded()
 
 	//This section is for predictive thresholding once you set a point.
     // Initializing the region by the area around the seedpoint
+  if (m_SeedInitialized) {
+  	QmitkThresholdComponentsToolGUI::RunSegmentation();
+  }
+  
+  else {
+    m_SeedInitialized = true;
     m_SeedPointValueMean = 0;
 
     itk::Index<3> currentIndex, runningIndex;
@@ -298,11 +303,13 @@ void QmitkThresholdMorphToolGUI::OnPointAdded()
       m_UPPERTHRESHOLD = max; //Always have default no limit on max intensity
       m_Controls.m_ThresholdSlider->setMaximumValue(m_UPPERTHRESHOLD);
       m_Controls.m_ThresholdSlider->setMinimumValue(m_LOWERTHRESHOLD);
+      
 
+	}
   }
 }
 
-void QmitkThresholdMorphToolGUI::RunSegmentation()
+void QmitkThresholdComponentsToolGUI::RunSegmentation()
 {
   if (m_InputImageNode.IsNull())
   {
@@ -310,7 +317,7 @@ void QmitkThresholdMorphToolGUI::RunSegmentation()
     return;
   }
 
-  mitk::DataNode::Pointer node = m_ThresholdMorphTool->GetPointSetNode();
+  mitk::DataNode::Pointer node = m_ThresholdComponentsTool->GetPointSetNode();
 
   if (node.IsNull())
   {
@@ -325,7 +332,7 @@ void QmitkThresholdMorphToolGUI::RunSegmentation()
   mitk::PointSet::Pointer seedPointSet = dynamic_cast<mitk::PointSet *>(node->GetData());
   if (seedPointSet.IsNull())
   {
-    m_Controls.m_pbRunSegmentation->setEnabled(true);
+    //m_Controls.m_pbRunSegmentation->setEnabled(true);
     QMessageBox::information(
       NULL, "Threshold Morphology functionality", "The seed point is empty! Please choose a new seed point.");
     return;
@@ -336,7 +343,7 @@ void QmitkThresholdMorphToolGUI::RunSegmentation()
 
   if (!(seedPointSet->GetSize(timeStep)))
   {
-    m_Controls.m_pbRunSegmentation->setEnabled(true);
+    //m_Controls.m_pbRunSegmentation->setEnabled(true);
     QMessageBox::information(
       NULL, "Threshold Morphology functionality", "The seed point is empty at this time! Please choose a new seed point.");
     return;
@@ -378,7 +385,7 @@ void QmitkThresholdMorphToolGUI::RunSegmentation()
 }
 
 template <typename TPixel, unsigned int VImageDimension>
-void QmitkThresholdMorphToolGUI::StartSegmentation(itk::Image<TPixel, VImageDimension> *itkImage,
+void QmitkThresholdComponentsToolGUI::StartSegmentation(itk::Image<TPixel, VImageDimension> *itkImage,
                                                            mitk::BaseGeometry *imageGeometry,
                                                            mitk::PointSet *seedPointSet)
 {
@@ -457,9 +464,9 @@ void QmitkThresholdMorphToolGUI::StartSegmentation(itk::Image<TPixel, VImageDime
   }
 
   
-  this->m_ThresholdMorphTool->SetOverwriteExistingSegmentation(true);
-  //The following line is responsible for creating the new segmentations problem, fixed by previous line though
-  mitk::Image::Pointer resultImage = dynamic_cast<mitk::Image *>(this->m_ThresholdMorphTool->GetTargetSegmentationNode()->GetData());
+  
+  //The following line is responsible for creating the new segmentations problem, fixed by this->m_ThresholdComponentsTool->SetOverwriteExistingSegmentation(true);
+  mitk::Image::Pointer resultImage = dynamic_cast<mitk::Image *>(this->m_ThresholdComponentsTool->GetTargetSegmentationNode()->GetData());
   int timeStep = mitk::BaseRenderer::GetInstance(mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget1"))->GetTimeStep();
   //This following line is critical for saving the segmentation
   resultImage->SetVolume((void *)(filter->GetOutput()->GetPixelContainer()->GetBufferPointer()), timeStep);
@@ -533,36 +540,36 @@ void QmitkThresholdMorphToolGUI::StartSegmentation(itk::Image<TPixel, VImageDime
 }
 
 
-void QmitkThresholdMorphToolGUI::ConfirmSegmentation()
+void QmitkThresholdComponentsToolGUI::ConfirmSegmentation()
 {
-  // get image node
-  if (m_InputImageNode.IsNull())
-  {
-    QMessageBox::critical(NULL, "Threshold Morphology functionality", "Please specify the image in Datamanager!");
-    return;
-  }
-  // get image data
-  mitk::Image::Pointer orgImage = dynamic_cast<mitk::Image *>(m_InputImageNode->GetData());
-  if (orgImage.IsNull())
-  {
-    QMessageBox::critical(NULL, "Threshold Morphology functionality", "No Image found!");
-    return;
-  }
-  // get labeled segmentation
-  mitk::Image::Pointer labeledSeg =
-    (mitk::Image *)m_DataStorage->GetNamedObject<mitk::Image>(m_NAMEFORLABLEDSEGMENTATIONIMAGE);
-  if (labeledSeg.IsNull())
-  {
-    QMessageBox::critical(NULL, "Threshold Morphology functionality", "No Segmentation Preview found!");
-    return;
-  }
+//  // get image node
+//  if (m_InputImageNode.IsNull())
+//  {
+//    QMessageBox::critical(NULL, "Threshold Morphology functionality", "Please specify the image in Datamanager!");
+//    return;
+//  }
+//  // get image data
+//  mitk::Image::Pointer orgImage = dynamic_cast<mitk::Image *>(m_InputImageNode->GetData());
+//  if (orgImage.IsNull())
+//  {
+//    QMessageBox::critical(NULL, "Threshold Morphology functionality", "No Image found!");
+//    return;
+//  }
+//  // get labeled segmentation
+//  mitk::Image::Pointer labeledSeg =
+//    (mitk::Image *)m_DataStorage->GetNamedObject<mitk::Image>(m_NAMEFORLABLEDSEGMENTATIONIMAGE);
+//  if (labeledSeg.IsNull())
+//  {
+//    QMessageBox::critical(NULL, "Threshold Morphology functionality", "No Segmentation Preview found!");
+//    return;
+//  }
 
-  mitk::DataNode::Pointer newNode = m_DataStorage->GetNamedNode(m_NAMEFORLABLEDSEGMENTATIONIMAGE);
-  if (newNode.IsNull())
-    return;
+//  mitk::DataNode::Pointer newNode = m_DataStorage->GetNamedNode(m_NAMEFORLABLEDSEGMENTATIONIMAGE);
+//  if (newNode.IsNull())
+//    return;
 
   QmitkConfirmSegmentationDialog dialog;
-  QString segName = QString::fromStdString(m_ThresholdMorphTool->GetCurrentSegmentationName());
+  QString segName = QString::fromStdString(m_ThresholdComponentsTool->GetCurrentSegmentationName());
 
   dialog.SetSegmentationName(segName);
   int result = dialog.exec();
@@ -570,43 +577,45 @@ void QmitkThresholdMorphToolGUI::ConfirmSegmentation()
   switch (result)
   {
     case QmitkConfirmSegmentationDialog::CREATE_NEW_SEGMENTATION:
-      m_ThresholdMorphTool->SetOverwriteExistingSegmentation(false);
+      m_ThresholdComponentsTool->SetOverwriteExistingSegmentation(false);
       break;
     case QmitkConfirmSegmentationDialog::OVERWRITE_SEGMENTATION:
-      m_ThresholdMorphTool->SetOverwriteExistingSegmentation(true);
+      m_ThresholdComponentsTool->SetOverwriteExistingSegmentation(true);
       break;
     case QmitkConfirmSegmentationDialog::CANCEL_SEGMENTATION:
       return;
   }
 
+	QmitkThresholdComponentsToolGUI::RunSegmentation();
+	
   // disable volume rendering preview after the segmentation node was created
   this->EnableVolumeRendering(false);
-  newNode->SetVisibility(false);
+  //newNode->SetVisibility(false);
   m_Controls.m_cbVolumeRendering->setChecked(false);
   // TODO disable slider etc...
 
-  if (m_ThresholdMorphTool.IsNotNull())
+  if (m_ThresholdComponentsTool.IsNotNull())
   {
-    m_ThresholdMorphTool->ConfirmSegmentation();
+    m_ThresholdComponentsTool->ConfirmSegmentation();
   }
 }
 
-void QmitkThresholdMorphToolGUI::EnableControls(bool enable)
+void QmitkThresholdComponentsToolGUI::EnableControls(bool enable)
 {
-  if (m_ThresholdMorphTool.IsNull())
+  if (m_ThresholdComponentsTool.IsNull())
     return;
 
   // Check if seed point is already set, if not leave RunSegmentation disabled
   // if even m_DataStorage is NULL leave node NULL
-  mitk::DataNode::Pointer node = m_ThresholdMorphTool->GetPointSetNode();
-  if (node.IsNull())
-  {
-    this->m_Controls.m_pbRunSegmentation->setEnabled(false);
-  }
-  else
-  {
-    this->m_Controls.m_pbRunSegmentation->setEnabled(enable);
-  }
+  mitk::DataNode::Pointer node = m_ThresholdComponentsTool->GetPointSetNode();
+//  if (node.IsNull())
+//  {
+//    this->m_Controls.m_pbRunSegmentation->setEnabled(false);
+//  }
+//  else
+//  {
+//    this->m_Controls.m_pbRunSegmentation->setEnabled(enable);
+//  }
 
   // Check if a segmentation exists, if not leave segmentation dependent disabled.
   // if even m_DataStorage is NULL leave node NULL
@@ -625,7 +634,7 @@ void QmitkThresholdMorphToolGUI::EnableControls(bool enable)
   this->m_Controls.m_cbVolumeRendering->setEnabled(enable);
 }
 
-void QmitkThresholdMorphToolGUI::EnableVolumeRendering(bool enable)
+void QmitkThresholdComponentsToolGUI::EnableVolumeRendering(bool enable)
 {
   mitk::DataNode::Pointer node = m_DataStorage->GetNamedNode(m_NAMEFORMASKEDSEGMENTATION);
 
@@ -651,38 +660,38 @@ void QmitkThresholdMorphToolGUI::EnableVolumeRendering(bool enable)
   mitk::RenderingManager::GetInstance()->RequestUpdateAll();
 }
 
-//void QmitkThresholdMorphToolGUI::UpdateVolumeRenderingThreshold(int thValue)
+//void QmitkThresholdComponentsToolGUI::UpdateVolumeRenderingThreshold(int thValue)
 
-void QmitkThresholdMorphToolGUI::UseVolumeRendering(bool on)
+void QmitkThresholdComponentsToolGUI::UseVolumeRendering(bool on)
 {
   m_UseVolumeRendering = on;
 
   this->EnableVolumeRendering(on);
 }
 
-void QmitkThresholdMorphToolGUI::SetLowerThresholdValue(double lowerThreshold)
+void QmitkThresholdComponentsToolGUI::SetLowerThresholdValue(double lowerThreshold)
 {
   m_LOWERTHRESHOLD = lowerThreshold;
   
   //Re-segmentation each time the threshold is changed
   if (m_SeedInitialized)
   {
-    QmitkThresholdMorphToolGUI::RunSegmentation();
+    QmitkThresholdComponentsToolGUI::RunSegmentation();
   }
 }
 
-void QmitkThresholdMorphToolGUI::SetUpperThresholdValue(double upperThreshold)
+void QmitkThresholdComponentsToolGUI::SetUpperThresholdValue(double upperThreshold)
 {
   m_UPPERTHRESHOLD = upperThreshold;
     
   //Re-segmentation each time the threshold is changed
   if (m_SeedInitialized)
   {
-    QmitkThresholdMorphToolGUI::RunSegmentation();
+    QmitkThresholdComponentsToolGUI::RunSegmentation();
   }
 }
 
-void QmitkThresholdMorphToolGUI::Deactivated()
+void QmitkThresholdComponentsToolGUI::Deactivated()
 {
   // make the segmentation preview node invisible
   mitk::DataNode::Pointer node = m_DataStorage->GetNamedNode(m_NAMEFORLABLEDSEGMENTATIONIMAGE);
@@ -696,6 +705,6 @@ void QmitkThresholdMorphToolGUI::Deactivated()
   m_Controls.m_cbVolumeRendering->setChecked(false);
 }
 
-void QmitkThresholdMorphToolGUI::Activated()
+void QmitkThresholdComponentsToolGUI::Activated()
 {
 }

@@ -13,8 +13,8 @@ A PARTICULAR PURPOSE.
 See LICENSE.txt or http://www.mitk.org for details.
 
 ===================================================================*/
-#ifndef QMITK_QmitkThresholdMorphToolGUI_H
-#define QMITK_QmitkThresholdMorphToolGUI_H
+#ifndef QMITK_QmitkThresholdComponentsToolGUI_H
+#define QMITK_QmitkThresholdComponentsToolGUI_H
 
 #include "itkImage.h"
 #include "mitkDataStorage.h"
@@ -22,27 +22,27 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include "mitkPointSet.h"
 
 #include "qwidget.h"
-#include "ui_QmitkThresholdMorphToolGUIControls.h"
+#include "ui_QmitkThresholdComponentsToolGUIControls.h"
 
 #include <MitkSegmentationUIExports.h>
 
 #include "QmitkToolGUI.h"
 
-#include "mitkThresholdMorphTool.h"
+#include "mitkThresholdComponentsTool.h"
 
 class QmitkStdMultiWidget;
 class DataNode;
-class QmitkThresholdMorphToolGUIControls;
+class QmitkThresholdComponentsToolGUIControls;
 
 /*!
 *
-* \brief QmitkThresholdMorphToolGUI
+* \brief QmitkThresholdComponentsToolGUI
 *
-* Threshold Morphology View class of the segmentation.
+* Threshold Components View class of the segmentation.
 *
 */
 
-class MITKSEGMENTATIONUI_EXPORT QmitkThresholdMorphToolGUI : public QmitkToolGUI
+class MITKSEGMENTATIONUI_EXPORT QmitkThresholdComponentsToolGUI : public QmitkToolGUI
 {
   Q_OBJECT
 
@@ -50,11 +50,11 @@ public:
   /**
    * @brief mitkClassMacro
    */
-  mitkClassMacro(QmitkThresholdMorphToolGUI, QmitkToolGUI);
+  mitkClassMacro(QmitkThresholdComponentsToolGUI, QmitkToolGUI);
 
   itkFactorylessNewMacro(Self) itkCloneMacro(Self)
 
-    QmitkThresholdMorphToolGUI(QWidget *parent = 0);
+    QmitkThresholdComponentsToolGUI(QWidget *parent = 0);
 
   /** \brief Method to create the connections for the component. This Method is obligatory even if no connections is
    * needed*/
@@ -100,7 +100,7 @@ public:
   /**
   * @brief The created GUI from the .ui-File. This Attribute is obligatory
   */
-  Ui::QmitkThresholdMorphToolGUIControls m_Controls;
+  Ui::QmitkThresholdComponentsToolGUIControls m_Controls;
 
 protected slots:
 
@@ -148,10 +148,10 @@ protected slots:
   void OnNewToolAssociated(mitk::Tool *);
 
 protected:
-  mitk::ThresholdMorphTool::Pointer m_ThresholdMorphTool;
+  mitk::ThresholdComponentsTool::Pointer m_ThresholdComponentsTool;
 
   /** \brief Destructor. */
-  virtual ~QmitkThresholdMorphToolGUI();
+  virtual ~QmitkThresholdComponentsToolGUI();
 
   // Pointer to the main widget to be able to reach the renderer
   QmitkStdMultiWidget *m_MultiWidget;

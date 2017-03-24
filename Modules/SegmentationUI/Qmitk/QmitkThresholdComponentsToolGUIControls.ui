@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QmitkThresholdMorphToolGUIControls</class>
- <widget class="QWidget" name="QmitkThresholdMorphToolGUIControls">
+ <class>QmitkThresholdComponentsToolGUIControls</class>
+ <widget class="QWidget" name="QmitkThresholdComponentsToolGUIControls">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>QmitkThresholdMorphWidget</string>
+   <string>QmitkThresholdComponentsWidget</string>
   </property>
   <property name="toolTip">
    <string>Move to adjust the segmentation</string>
@@ -91,7 +91,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="m_pbRunSegmentation">
+      <widget class="QPushButton" name="m_pbConfirmSegementation">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -105,10 +105,10 @@
         <font/>
        </property>
        <property name="toolTip">
-        <string>Press to start the segmentation of the tubular structure.</string>
+        <string>Press to re-save the segmentation.</string>
        </property>
        <property name="text">
-        <string>Run Segmentation</string>
+        <string>Rewrite Segmentation</string>
        </property>
        <property name="shortcut">
         <string>Alt+R</string>
@@ -140,7 +140,7 @@ p, li { white-space: pre-wrap; }
         <string>3D preview</string>
        </property>
        <property name="checked">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -186,25 +186,25 @@ p, li { white-space: pre-wrap; }
 <!--     </layout>-->
 <!--    </widget>-->
 <!--   </item>-->
-   <item>
-    <widget class="QPushButton" name="m_pbConfirmSegementation">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="font">
-      <font/>
-     </property>
-     <property name="toolTip">
-      <string>Press to confirm the segmentation and calculate 3D representation.</string>
-     </property>
-     <property name="text">
-      <string>&amp;Confirm Segmentation</string>
-     </property>
-     <property name="shortcut">
-      <string>Alt+C</string>
-     </property>
-    </widget>
-   </item>
+<!--   <item>-->
+<!--    <widget class="QPushButton" name="m_pbConfirmSegementation">-->
+<!--     <property name="enabled">-->
+<!--      <bool>false</bool>-->
+<!--     </property>-->
+<!--     <property name="font">-->
+<!--      <font/>-->
+<!--     </property>-->
+<!--     <property name="toolTip">-->
+<!--      <string>Press to confirm the segmentation and calculate 3D representation.</string>-->
+<!--     </property>-->
+<!--     <property name="text">-->
+<!--      <string>&amp;Confirm Segmentation</string>-->
+<!--     </property>-->
+<!--     <property name="shortcut">-->
+<!--      <string>Alt+C</string>-->
+<!--     </property>-->
+<!--    </widget>-->
+<!--   </item>-->
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

@@ -14,8 +14,8 @@ See LICENSE.txt or http://www.mitk.org for details.
 
 ===================================================================*/
 
-#ifndef mitkThresholdMorphTool_h_Included
-#define mitkThresholdMorphTool_h_Included
+#ifndef mitkThresholdComponentsTool_h_Included
+#define mitkThresholdComponentsTool_h_Included
 
 #include "mitkAutoSegmentationTool.h"
 #include "mitkCommon.h"
@@ -32,21 +32,21 @@ namespace us
 namespace mitk
 {
   /**
-  \brief Dummy Tool for ThresholdMorphToolGUI to get Tool functionality for ThresholdMorph.
-  The actual logic is implemented in QmitkThresholdMorphToolGUI.
+  \brief Dummy Tool for ThresholdComponentsToolGUI to get Tool functionality for ThresholdComponents.
+  The actual logic is implemented in QmitkThresholdComponentsToolGUI.
 
   \ingroup ToolManagerEtAl
   \sa mitk::Tool
   \sa QmitkInteractiveSegmentation
 
   */
-  class MITKSEGMENTATION_EXPORT ThresholdMorphTool : public AutoSegmentationTool
+  class MITKSEGMENTATION_EXPORT ThresholdComponentsTool : public AutoSegmentationTool
   {
   public:
     /**
      * @brief mitkClassMacro
      */
-    mitkClassMacro(ThresholdMorphTool, AutoSegmentationTool);
+    mitkClassMacro(ThresholdComponentsTool, AutoSegmentationTool);
     itkFactorylessNewMacro(Self) itkCloneMacro(Self)
 
       bool CanHandle(BaseData *referenceData) const override;
@@ -116,12 +116,12 @@ namespace mitk
     /**
      * @brief constructor
      */
-    ThresholdMorphTool(); // purposely hidden
+    ThresholdComponentsTool(); // purposely hidden
 
     /**
      * @brief destructor
      */
-    virtual ~ThresholdMorphTool();
+    virtual ~ThresholdComponentsTool();
 
 //  private:
 
