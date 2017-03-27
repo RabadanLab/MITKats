@@ -22,6 +22,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <itkBinaryFillholeImageFilter.h>
 #include <itkBinaryMorphologicalClosingImageFilter.h>
 #include <itkBinaryMorphologicalOpeningImageFilter.h>
+#include <itkBinaryPruningImageFilter.h>
 #include <mitkImageAccessByItk.h>
 #include <mitkImageCast.h>
 #include <mitkImageReadAccessor.h>
@@ -210,6 +211,40 @@ void mitk::MorphologicalOperations::FillHoles(mitk::Image::Pointer &image)
   MITK_INFO << "Finished FillHole";
 }
 
+void mitk::MorphologicalOperations::Pruning(mitk::Image::Pointer &image)
+{
+  MITK_INFO << "Start Pruning...";
+
+  int timeSteps = static_cast<int>(image->GetTimeSteps());
+
+  if (timeSteps > 1)
+  {
+    mitk::ImageTimeSelector::Pointer timeSelector = mitk::ImageTimeSelector::New();
+    timeSelector->SetInput(image);
+
+    for (int t = 0; t < timeSteps; ++t)
+    {
+      MITK_INFO << "  Processing time step " << t;
+
+      timeSelector->SetTimeNr(t);
+      timeSelector->Update();
+
+      mitk::Image::Pointer img3D = timeSelector->GetOutput();
+      img3D->DisconnectPipeline();
+
+      AccessByItk_1(img3D, itkPruning, img3D);
+
+      mitk::ImageReadAccessor accessor(img3D);
+      image->SetVolume(accessor.GetData(), t);
+    }
+  }
+  else
+  {
+    AccessByItk_1(image, itkPruning, image);
+  }
+
+  MITK_INFO << "Finished Pruning";
+}
 template <typename TPixel, unsigned int VDimension>
 void mitk::MorphologicalOperations::itkClosing(
   itk::Image<TPixel, VDimension> *sourceImage,
@@ -381,4 +416,19 @@ void mitk::MorphologicalOperations::itkFillHoles(itk::Image<TPixel, VDimension> 
   fillHoleFilter->UpdateLargestPossibleRegion();
 
   mitk::CastToMitkImage(fillHoleFilter->GetOutput(), resultImage);
+}
+
+template <typename TPixel, unsigned int VDimension>
+void mitk::MorphologicalOperations::itkPruning(itk::Image<TPixel, VDimension> *sourceImage,
+                                                 mitk::Image::Pointer &resultImage)
+{
+  typedef itk::Image<TPixel, VDimension> ImageType;
+  typedef typename itk::BinaryPruningImageFilter<ImageType, ImageType> PruningFilterType;
+
+  typename PruningFilterType::Pointer pruningFilter = PruningFilterType::New();
+  pruningFilter->SetInput(sourceImage);
+  pruningFilter->SetIteration(1); //todo: allow user set iteration
+  pruningFilter->UpdateLargestPossibleRegion();
+
+  mitk::CastToMitkImage(pruningFilter->GetOutput(), resultImage);
 }
