@@ -34,7 +34,6 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <itkConnectedThresholdImageFilter.h>
 #include <itkImageIterator.h>
 #include <itkMinimumMaximumImageCalculator.h>
-#include <mitkIOUtil.h> //only needed for writing out test images
 
 #include "QmitkConfirmSegmentationDialog.h"
 #include "itkOrImageFilter.h"
@@ -58,7 +57,7 @@ QmitkThresholdComponentsToolGUI::QmitkThresholdComponentsToolGUI(QWidget *parent
 
   m_Controls.setupUi(this);
 
-	//ctkRangeWidget controls the slider
+	//ctkRangeWidget controls for this slider
   m_Controls.m_ThresholdSlider->setDecimals(1);
   m_Controls.m_ThresholdSlider->setSingleStep(10.0); //adjust step size of slider
   m_Controls.m_ThresholdSlider->setSpinBoxAlignment(Qt::AlignVCenter);
@@ -123,8 +122,6 @@ void QmitkThresholdComponentsToolGUI::RemoveHelperNodes()
 void QmitkThresholdComponentsToolGUI::CreateConnections()
 {
   // Connecting GUI components
-  //connect((QObject *)(m_Controls.m_pbRunSegmentation), SIGNAL(clicked()), this, SLOT(RunSegmentation()));
-  //connect(m_Controls.m_PreviewSlider, SIGNAL(valueChanged(double)), this, SLOT(ChangeLevelWindow(double)));
   connect((QObject *)(m_Controls.m_pbConfirmSegementation), SIGNAL(clicked()), this, SLOT(ConfirmSegmentation()));
   connect((QObject *)(m_Controls.m_cbVolumeRendering), SIGNAL(toggled(bool)), this, SLOT(UseVolumeRendering(bool)));
   connect(
@@ -183,7 +180,7 @@ void QmitkThresholdComponentsToolGUI::OnPointAdded()
     return;
 
   mitk::DataNode *node = m_ThresholdComponentsTool->GetPointSetNode();
-	//m_ThresholdComponentsTool->GetPointSetNode()->SetData(); //to add data to this node.
+
   if (node != NULL)
   {
     mitk::PointSet::Pointer pointSet = dynamic_cast<mitk::PointSet *>(node->GetData());
@@ -194,33 +191,22 @@ void QmitkThresholdComponentsToolGUI::OnPointAdded()
       return;
     }
 
-    //m_Controls.m_lblSetSeedpoint->setText("");
-
     mitk::Image *image = dynamic_cast<mitk::Image *>(m_InputImageNode->GetData());
 	
-	int numberSeedPoints=pointSet->GetSize(); //Counts number of seeds
+	  int numberSeedPoints=pointSet->GetSize(); //Counts number of seeds
     mitk::Point3D seedPoint =
       pointSet
         ->GetPointSet(
           mitk::BaseRenderer::GetInstance(mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget1"))->GetTimeStep())
         ->GetPoints()
-        ->ElementAt(numberSeedPoints-1);  //Makes seedPoint the latest seed
-        //->ElementAt(0);
+        ->ElementAt(numberSeedPoints-1);
 
     if (image->GetGeometry()->IsInside(seedPoint))
       mitkPixelTypeMultiplex3(
         AccessPixel, image->GetChannelDescriptor().GetPixelType(), image, seedPoint, m_SeedpointValue) else return;
 
-//Access data by pointSet->GetPointSet(mitk::BaseRenderer::GetInstance(mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget1"))->GetTimeStep())->GetPoints()->ElementAt(foo)
-//for simple access of seed positions
-//  itk::Index<3> seedPosition;
-//  seedPosition[0] = seedPoint[0];
-//  seedPosition[1] = seedPoint[1];
-//  seedPosition[2] = seedPoint[2];	
-
-
 	//This section is for predictive thresholding once you set a point.
-    // Initializing the region by the area around the seedpoint
+  // Initializing the region by the area around the seedpoint
   if (m_SeedInitialized) {
   	QmitkThresholdComponentsToolGUI::RunSegmentation();
   }
@@ -299,10 +285,10 @@ void QmitkThresholdComponentsToolGUI::OnPointAdded()
 
     mitk::ScalarType max = image->GetStatistics()->GetScalarValueMax();
 
-      m_LOWERTHRESHOLD = m_SeedPointValueMean - stdDev;
-      m_UPPERTHRESHOLD = max; //Always have default no limit on max intensity
-      m_Controls.m_ThresholdSlider->setMaximumValue(m_UPPERTHRESHOLD);
-      m_Controls.m_ThresholdSlider->setMinimumValue(m_LOWERTHRESHOLD);
+    m_LOWERTHRESHOLD = m_SeedPointValueMean - stdDev;
+    m_UPPERTHRESHOLD = max; //Always have default no limit on max intensity
+    m_Controls.m_ThresholdSlider->setMaximumValue(m_UPPERTHRESHOLD);
+    m_Controls.m_ThresholdSlider->setMinimumValue(m_LOWERTHRESHOLD);
       
 
 	}
@@ -332,7 +318,6 @@ void QmitkThresholdComponentsToolGUI::RunSegmentation()
   mitk::PointSet::Pointer seedPointSet = dynamic_cast<mitk::PointSet *>(node->GetData());
   if (seedPointSet.IsNull())
   {
-    //m_Controls.m_pbRunSegmentation->setEnabled(true);
     QMessageBox::information(
       NULL, "Threshold Morphology functionality", "The seed point is empty! Please choose a new seed point.");
     return;
@@ -343,7 +328,6 @@ void QmitkThresholdComponentsToolGUI::RunSegmentation()
 
   if (!(seedPointSet->GetSize(timeStep)))
   {
-    //m_Controls.m_pbRunSegmentation->setEnabled(true);
     QMessageBox::information(
       NULL, "Threshold Morphology functionality", "The seed point is empty at this time! Please choose a new seed point.");
     return;
@@ -393,25 +377,22 @@ void QmitkThresholdComponentsToolGUI::StartSegmentation(itk::Image<TPixel, VImag
   typedef typename InputImageType::IndexType IndexType;
   typedef itk::ConnectedThresholdImageFilter<InputImageType, InputImageType> ThresholdFilterType;
   typedef itk::MaskImageFilter<InputImageType, InputImageType, InputImageType> MaskImageFilterType;
-
-  
   typename ThresholdFilterType::Pointer filter = ThresholdFilterType::New();
 
-
-
-    int numberSeedPoints=seedPointSet->GetSize(); //Counts number of seeds
-    mitk::Point3D seedPoint;
-    IndexType seedIndex;
-    
-    for( int counter=0; counter<numberSeedPoints; counter++) {
+  int numberSeedPoints=seedPointSet->GetSize(); //Counts number of seeds
+  mitk::Point3D seedPoint;
+  IndexType seedIndex;
+  
+  for( int counter=0; counter<numberSeedPoints; counter++) 
+  {
    	 seedPoint=seedPointSet
         ->GetPointSet(
           mitk::BaseRenderer::GetInstance(mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget1"))->GetTimeStep())
         ->GetPoints()
         ->ElementAt(counter);
         
-        //errors with seed points
-          if (!imageGeometry->IsInside(seedPoint))
+    //errors with seed points
+    if (!imageGeometry->IsInside(seedPoint))
   	{
    	 	QApplication::restoreOverrideCursor(); // reset cursor to be able to click ok with the regular mouse cursor
     		QMessageBox::information(NULL,
@@ -420,23 +401,9 @@ void QmitkThresholdComponentsToolGUI::StartSegmentation(itk::Image<TPixel, VImag
     		return;
   	}
 
-	//optionally, fix this test for whether seed points are in selected regions        
-	//  if (m_SeedpointValue > m_UPPERTHRESHOLD || m_SeedpointValue < m_LOWERTHRESHOLD)
-	//  {
-	//    QApplication::restoreOverrideCursor(); // reset cursor to be able to click ok with the regular mouse cursor
-	//    QMessageBox::information(
-	//      NULL,
-	//      "Segmentation functionality",
-	//      "The seed point is outside the defined thresholds! Please set a new seed point or adjust the thresholds.");
-	//    MITK_INFO << "Mean: " << m_SeedPointValueMean;
-	//    return;
-	//  }
-        
-        
-        //place seed point into filter
-        imageGeometry->WorldToIndex(seedPoint, seedIndex); // convert world coordinates to image indices
-  	filter->AddSeed(seedIndex);  
-  	}
+    imageGeometry->WorldToIndex(seedPoint, seedIndex); // convert world coordinates to image indices
+  	filter->AddSeed(seedIndex);   //place seed point into filter
+	}
 
 
   filter->SetInput(itkImage);
@@ -462,28 +429,15 @@ void QmitkThresholdComponentsToolGUI::StartSegmentation(itk::Image<TPixel, VImag
     QMessageBox::critical(NULL, "Threshold Morphology Segmentation Functionality", "An error occurred during segmentation!");
     return;
   }
-
   
-  
-  //The following line is responsible for creating the new segmentations problem, fixed by this->m_ThresholdComponentsTool->SetOverwriteExistingSegmentation(true);
+  //Create and write segmentation
   mitk::Image::Pointer resultImage = dynamic_cast<mitk::Image *>(this->m_ThresholdComponentsTool->GetTargetSegmentationNode()->GetData());
   int timeStep = mitk::BaseRenderer::GetInstance(mitk::BaseRenderer::GetRenderWindowByName("stdmulti.widget1"))->GetTimeStep();
-  //This following line is critical for saving the segmentation
   resultImage->SetVolume((void *)(filter->GetOutput()->GetPixelContainer()->GetBufferPointer()), timeStep);
   
-// test message box
-//  	QString status = QString("seed x: %1").arg(thresholdRatio);
-//	QMessageBox::information(this, "Info", status);	
-
-// test writing out the image
-//mitk::Image::Pointer writeImage = mitk::ImportItkImage(filter->GetOutput());
-//	mitk::IOUtil *writer;
-//	writer->Save(writeImage, "testtest.nii");
-
-
   // create new node and then delete the old one if there is one
   mitk::DataNode::Pointer newNode = mitk::DataNode::New();
- newNode->SetData(resultImage);
+  newNode->SetData(resultImage);
 
   // set some properties
   newNode->SetProperty("name", mitk::StringProperty::New(m_NAMEFORLABLEDSEGMENTATIONIMAGE));
@@ -498,7 +452,8 @@ void QmitkThresholdComponentsToolGUI::StartSegmentation(itk::Image<TPixel, VImag
 
   // now add result to data tree
   m_DataStorage->Add(newNode, m_InputImageNode);
-
+  
+  //Create mask for 3D visualization
   typename InputImageType::Pointer inputImageItk;
   mitk::CastToItkImage<InputImageType>(resultImage, inputImageItk);
   
@@ -529,45 +484,15 @@ void QmitkThresholdComponentsToolGUI::StartSegmentation(itk::Image<TPixel, VImag
   // now add result to data tree
   m_DataStorage->Add(maskedNode, m_InputImageNode);
 
-
-
   if (m_UseVolumeRendering)
     this->EnableVolumeRendering(true);
 
-  // Setting progress to finished
-  //mitk::ProgressBar::GetInstance()->Progress(357);
   mitk::RenderingManager::GetInstance()->RequestUpdateAll();
 }
 
 
 void QmitkThresholdComponentsToolGUI::ConfirmSegmentation()
 {
-//  // get image node
-//  if (m_InputImageNode.IsNull())
-//  {
-//    QMessageBox::critical(NULL, "Threshold Morphology functionality", "Please specify the image in Datamanager!");
-//    return;
-//  }
-//  // get image data
-//  mitk::Image::Pointer orgImage = dynamic_cast<mitk::Image *>(m_InputImageNode->GetData());
-//  if (orgImage.IsNull())
-//  {
-//    QMessageBox::critical(NULL, "Threshold Morphology functionality", "No Image found!");
-//    return;
-//  }
-//  // get labeled segmentation
-//  mitk::Image::Pointer labeledSeg =
-//    (mitk::Image *)m_DataStorage->GetNamedObject<mitk::Image>(m_NAMEFORLABLEDSEGMENTATIONIMAGE);
-//  if (labeledSeg.IsNull())
-//  {
-//    QMessageBox::critical(NULL, "Threshold Morphology functionality", "No Segmentation Preview found!");
-//    return;
-//  }
-
-//  mitk::DataNode::Pointer newNode = m_DataStorage->GetNamedNode(m_NAMEFORLABLEDSEGMENTATIONIMAGE);
-//  if (newNode.IsNull())
-//    return;
-
   QmitkConfirmSegmentationDialog dialog;
   QString segName = QString::fromStdString(m_ThresholdComponentsTool->GetCurrentSegmentationName());
 
@@ -590,9 +515,7 @@ void QmitkThresholdComponentsToolGUI::ConfirmSegmentation()
 	
   // disable volume rendering preview after the segmentation node was created
   this->EnableVolumeRendering(false);
-  //newNode->SetVisibility(false);
   m_Controls.m_cbVolumeRendering->setChecked(false);
-  // TODO disable slider etc...
 
   if (m_ThresholdComponentsTool.IsNotNull())
   {
@@ -605,29 +528,17 @@ void QmitkThresholdComponentsToolGUI::EnableControls(bool enable)
   if (m_ThresholdComponentsTool.IsNull())
     return;
 
-  // Check if seed point is already set, if not leave RunSegmentation disabled
-  // if even m_DataStorage is NULL leave node NULL
   mitk::DataNode::Pointer node = m_ThresholdComponentsTool->GetPointSetNode();
-//  if (node.IsNull())
-//  {
-//    this->m_Controls.m_pbRunSegmentation->setEnabled(false);
-//  }
-//  else
-//  {
-//    this->m_Controls.m_pbRunSegmentation->setEnabled(enable);
-//  }
 
   // Check if a segmentation exists, if not leave segmentation dependent disabled.
   // if even m_DataStorage is NULL leave node NULL
   node = m_DataStorage ? m_DataStorage->GetNamedNode(m_NAMEFORLABLEDSEGMENTATIONIMAGE) : NULL;
   if (node.IsNull())
   {
-    //this->m_Controls.m_PreviewSlider->setEnabled(false);
     this->m_Controls.m_pbConfirmSegementation->setEnabled(false);
   }
   else
   {
-    //this->m_Controls.m_PreviewSlider->setEnabled(enable);
     this->m_Controls.m_pbConfirmSegementation->setEnabled(enable);
   }
 
@@ -654,13 +565,8 @@ void QmitkThresholdComponentsToolGUI::EnableVolumeRendering(bool enable)
     node->SetBoolProperty("volumerendering", enable);
   }
 
-  //double val = this->m_Controls.m_PreviewSlider->value();
-  //this->ChangeLevelWindow(val);
-
   mitk::RenderingManager::GetInstance()->RequestUpdateAll();
 }
-
-//void QmitkThresholdComponentsToolGUI::UpdateVolumeRenderingThreshold(int thValue)
 
 void QmitkThresholdComponentsToolGUI::UseVolumeRendering(bool on)
 {

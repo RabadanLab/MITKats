@@ -65,7 +65,7 @@ const char **mitk::ThresholdComponentsTool::GetXPM() const
 
 const char *mitk::ThresholdComponentsTool::GetName() const
 {
-  return "Threshold Components"; //This is where to change the apparent name, but also change in plugins/src/internal/QmitkSegmentationView.cpp
+  return "Threshold Components";
 }
 
 us::ModuleResource mitk::ThresholdComponentsTool::GetIconResource() const
