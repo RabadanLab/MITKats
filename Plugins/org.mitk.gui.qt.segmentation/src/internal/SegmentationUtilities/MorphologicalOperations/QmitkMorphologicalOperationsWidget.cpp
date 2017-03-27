@@ -232,7 +232,7 @@ void QmitkMorphologicalOperationsWidget::OnPruningButtonClicked()
 
   try
   {
-    mitk::MorphologicalOperations::Pruning(image);
+    mitk::MorphologicalOperations::Pruning(image, m_Controls.spinBoxMorphFactor->value());
   }
   catch (const itk::ExceptionObject& exception)
   {

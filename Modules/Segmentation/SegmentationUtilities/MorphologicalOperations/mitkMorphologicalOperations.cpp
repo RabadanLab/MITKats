@@ -211,7 +211,7 @@ void mitk::MorphologicalOperations::FillHoles(mitk::Image::Pointer &image)
   MITK_INFO << "Finished FillHole";
 }
 
-void mitk::MorphologicalOperations::Pruning(mitk::Image::Pointer &image)
+void mitk::MorphologicalOperations::Pruning(mitk::Image::Pointer &image, int iterations)
 {
   MITK_INFO << "Start Pruning...";
 
@@ -232,7 +232,7 @@ void mitk::MorphologicalOperations::Pruning(mitk::Image::Pointer &image)
       mitk::Image::Pointer img3D = timeSelector->GetOutput();
       img3D->DisconnectPipeline();
 
-      AccessByItk_1(img3D, itkPruning, img3D);
+      AccessByItk_2(img3D, itkPruning, img3D, iterations);
 
       mitk::ImageReadAccessor accessor(img3D);
       image->SetVolume(accessor.GetData(), t);
@@ -240,7 +240,7 @@ void mitk::MorphologicalOperations::Pruning(mitk::Image::Pointer &image)
   }
   else
   {
-    AccessByItk_1(image, itkPruning, image);
+    AccessByItk_2(image, itkPruning, image, iterations);
   }
 
   MITK_INFO << "Finished Pruning";
@@ -420,14 +420,14 @@ void mitk::MorphologicalOperations::itkFillHoles(itk::Image<TPixel, VDimension> 
 
 template <typename TPixel, unsigned int VDimension>
 void mitk::MorphologicalOperations::itkPruning(itk::Image<TPixel, VDimension> *sourceImage,
-                                                 mitk::Image::Pointer &resultImage)
+                                                 mitk::Image::Pointer &resultImage, int iterations)
 {
   typedef itk::Image<TPixel, VDimension> ImageType;
   typedef typename itk::BinaryPruningImageFilter<ImageType, ImageType> PruningFilterType;
 
   typename PruningFilterType::Pointer pruningFilter = PruningFilterType::New();
   pruningFilter->SetInput(sourceImage);
-  pruningFilter->SetIteration(1); //todo: allow user set iteration
+  pruningFilter->SetIteration(iterations);
   pruningFilter->UpdateLargestPossibleRegion();
 
   mitk::CastToMitkImage(pruningFilter->GetOutput(), resultImage);
