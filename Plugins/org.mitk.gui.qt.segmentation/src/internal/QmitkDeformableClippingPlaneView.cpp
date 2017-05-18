@@ -552,7 +552,9 @@ void QmitkDeformableClippingPlaneView::OnSelectClippedSegment(QListWidgetItem* i
     mitk::ToolManagerProvider::GetInstance()->GetToolManager()->GetWorkingData(0)->SetSelected(false);
   }
   emptySegmentation->SetSelected(true); 
+
   this->GetDataStorage()->Add( emptySegmentation, node ); 
+
   this->FireNodeSelected( emptySegmentation );
   mitk::RenderingManager::GetInstance()->InitializeViews(emptySegmentation->GetData()->GetTimeGeometry(), mitk::RenderingManager::REQUEST_UPDATE_ALL, true);
   
